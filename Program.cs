@@ -22,12 +22,11 @@ builder.Services.AddDbContext<AppDbContext>();
 
 var app = builder.Build();
 
-// *** ADICIONE ESTE BLOCO PARA CRIAR O BD NA INICIALIZAÇÃO ***
 using (var scope = app.Services.CreateScope())
 {
-    var services = scope.ServiceProvider;
-    var context = services.GetRequiredService<AppDbContext>();
-    context.Database.EnsureCreated();
+    var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    // Este comando aplica as migrações pendentes, em vez de apenas criar o banco.
+    dbContext.Database.Migrate();
 }
 
 
