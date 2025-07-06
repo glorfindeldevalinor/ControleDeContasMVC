@@ -1,0 +1,64 @@
+﻿@model IEnumerable<Conta>
+@{
+    ViewData["Title"] = "Controle de Contas";
+    var dataFiltro = (DateTime)ViewBag.DataFiltro;
+    var balanco = (decimal)ViewBag.Balanco;
+}
+
+<h1>Controle de Contas - @dataFiltro.ToString("MMMM/yyyy")</h1>
+
+<div class="row mb-3">
+    <div class="col-md-6">
+        <form asp-action="Index" method="get" class="form-inline">
+            <a class="btn btn-secondary" href="@Url.Action("Index", new { mes = dataFiltro.AddMonths(-1).Month, ano = dataFiltro.AddMonths(-1).Year })">‹ Mês Anterior</a>
+            <a class="btn btn-secondary mx-2" href="@Url.Action("Index", new { mes = dataFiltro.AddMonths(1).Month, ano = dataFiltro.AddMonths(1).Year })">Próximo Mês ›</a>
+        </form>
+    </div>
+    <div class="col-md-6 text-right">
+        <a asp-action="Criar" class="btn btn-primary">Adicionar Nova Conta</a>
+        <form asp-action="CriarNovoMes" method="post" class="d-inline">
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="mes" value="@dataFiltro.Month" />
+            <input type="hidden" name="ano" value="@dataFiltro.Year" />
+            <button type="submit" class="btn btn-info">Criar Mês Seguinte</button>
+        </form>
+    </div>
+</div>
+
+<div class="row mb-4 text-center">
+    <div class="col-md-4"><div class="card p-2"><h5 class="card-title">Proventos</h5><p class="card-text text-success">@ViewBag.TotalProventos.ToString("C")</p></div></div>
+    <div class="col-md-4"><div class="card p-2"><h5 class="card-title">Despesas</h5><p class="card-text text-danger">@ViewBag.TotalDespesas.ToString("C")</p></div></div>
+    <div class="col-md-4"><div class="card p-2"><h5 class="card-title">Balanço</h5><p class="card-text @(balanco >= 0 ? "text-success" : "text-danger")">@balanco.ToString("C")</p></div></div>
+</div>
+
+<table class="table table-striped table-hover">
+    <thead>
+        <tr>
+            <th>Nome</th>
+            <th>Valor</th>
+            <th>Vencimento</th>
+            <th>Status</th>
+            <th>Observação</th>
+            <th>Ações</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr class="@(item.Status == StatusConta.Pago ? "table-success" : "")">
+                <td>@Html.DisplayFor(modelItem => item.Nome)</td>
+                <td class="@(item.Tipo == TipoConta.Provento ? "text-success" : "text-danger")">@Html.DisplayFor(modelItem => item.Valor)</td>
+                <td>@item.DataVencimento.ToString("dd/MM/yyyy")</td>
+                <td>@Html.DisplayFor(modelItem => item.Status)</td>
+                <td>@Html.DisplayFor(modelItem => item.Observacao)</td>
+                <td>
+                    <a asp-action="Editar" asp-route-id="@item.Id" class="btn btn-sm btn-warning">Editar</a>
+                    <form asp-action="Deletar" asp-route-id="@item.Id" method="post" class="d-inline" onsubmit="return confirm('Tem certeza?');">
+                        @Html.AntiForgeryToken()
+                        <button type="submit" class="btn btn-sm btn-danger">Excluir</button>
+                    </form>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

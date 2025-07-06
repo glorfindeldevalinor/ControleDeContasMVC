@@ -1,0 +1,20 @@
+﻿@model Conta
+@{
+    ViewData["Title"] = "Editar Conta";
+}
+
+<h1>Editar Conta</h1>
+<hr />
+<div class="row">
+    <div class="col-md-6">
+        <form asp-action="Editar">
+            <input type="hidden" asp-for="Id" />
+            <input type="hidden" asp-for="Ativo" />
+            @await Html.PartialAsync("_ContaFormulario")
+            <div class="form-group mt-3">
+                <input type="submit" value="Salvar Alterações" class="btn btn-primary" />
+                <a asp-action="Index" class="btn btn-secondary">Voltar</a>
+            </div>
+        </form>
+    </div>
+</div>

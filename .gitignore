@@ -1,0 +1,15 @@
+# Arquivos de configuração local com senhas
+appsettings.Development.json
+appsettings.json
+
+# Dependências e arquivos de build
+[Bb]in/
+[Oo]bj/
+
+# Arquivos do Rider
+.idea/
+
+# Arquivos do Visual Studio
+.vs/
+*.suo
+*.user

@@ -1,0 +1,18 @@
+﻿@model Conta
+@{
+    ViewData["Title"] = "Criar Nova Conta";
+}
+
+<h1>Criar Nova Conta</h1>
+<hr />
+<div class="row">
+    <div class="col-md-6">
+        <form asp-action="Criar">
+            @await Html.PartialAsync("_ContaFormulario")
+            <div class="form-group mt-3">
+                <input type="submit" value="Salvar" class="btn btn-primary" />
+                <a asp-action="Index" class="btn btn-secondary">Voltar</a>
+            </div>
+        </form>
+    </div>
+</div>
