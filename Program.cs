@@ -8,7 +8,7 @@ using ControleDeContasMVC.Contexto;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
-
+AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(connectionString));
