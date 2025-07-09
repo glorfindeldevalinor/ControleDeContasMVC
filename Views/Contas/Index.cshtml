@@ -100,16 +100,16 @@
 
 <div class="table-responsive">
 <table class="table table-striped table-hover">
-    <thead>
-        <tr>
-            <th>Nome</th>
-            <th>Valor</th>
-            <th>Vencimento</th>
-            <th>Status</th>
-            <th>Observação</th>
-            <th>Ações</th>
-        </tr>
-    </thead>
+        <thead>
+            <tr>
+                <th class="sortable" data-type="text">Nome</th>
+                <th class="sortable" data-type="currency">Valor</th>
+                <th class="sortable" data-type="date">Vencimento</th>
+                <th class="sortable" data-type="text">Status</th>
+                <th>Observação</th>
+                <th>Ações</th>
+            </tr>
+        </thead>
     <tbody>
         @foreach (var item in Model)
         {
@@ -142,3 +142,74 @@
     </div>
 
 </div>
+
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const table = document.querySelector('.table');
+            if (!table) return;
+
+            const headers = table.querySelectorAll('th.sortable');
+            const tbody = table.querySelector('tbody');
+
+            headers.forEach((header, index) => {
+                header.addEventListener('click', () => {
+                    // Limpa a ordenação de outras colunas
+                    headers.forEach(h => {
+                        if (h !== header) {
+                            h.classList.remove('sort-asc', 'sort-desc');
+                        }
+                    });
+
+                    const sortDirection = header.classList.contains('sort-asc') ? 'desc' : 'asc';
+
+                    if (sortDirection === 'desc') {
+                        header.classList.remove('sort-asc');
+                        header.classList.add('sort-desc');
+                    } else {
+                        header.classList.remove('sort-desc');
+                        header.classList.add('sort-asc');
+                    }
+
+                    // A mágica da ordenação acontece aqui
+                    sortTable(index, sortDirection, header.dataset.type);
+                });
+            });
+
+            const sortTable = (columnIndex, direction, type) => {
+                const rows = Array.from(tbody.querySelectorAll('tr'));
+                const directionModifier = direction === 'asc' ? 1 : -1;
+
+                const sortedRows = rows.sort((a, b) => {
+                    const aText = a.children[columnIndex].innerText.trim();
+                    const bText = b.children[columnIndex].innerText.trim();
+
+                    switch (type) {
+                        case 'date':
+                            // Converte a data de dd/MM/yyyy para um formato comparável
+                            const [dayA, monthA, yearA] = aText.split('/');
+                            const dateA = new Date(`${yearA}-${monthA}-${dayA}`);
+                            const [dayB, monthB, yearB] = bText.split('/');
+                            const dateB = new Date(`${yearB}-${monthB}-${dayB}`);
+                            return (dateA - dateB) * directionModifier;
+                        case 'currency':
+                            // Converte R$ 1.250,50 para 1250.50
+                            const numA = parseFloat(aText.replace('R$', '').replace(/\./g, '').replace(',', '.').trim());
+                            const numB = parseFloat(bText.replace('R$', '').replace(/\./g, '').replace(',', '.').trim());
+                            return (numA - numB) * directionModifier;
+                        case 'text':
+                        default:
+                            return aText.localeCompare(bText) * directionModifier;
+                    }
+                });
+
+                // Re-adiciona as linhas ordenadas na tabela
+                while (tbody.firstChild) {
+                    tbody.removeChild(tbody.firstChild);
+                }
+                tbody.append(...sortedRows);
+            };
+        });
+    </script>
+}
