@@ -5,6 +5,7 @@
 // e a seção para criar o banco de dados na inicialização.
 
 using ControleDeContasMVC.Contexto;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -12,6 +13,14 @@ AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(connectionString));
+
+builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+    .AddCookie(options =>
+    {
+        options.LoginPath = "/Account/Login"; // Página para onde será redirecionado se não estiver logado
+        options.ExpireTimeSpan = TimeSpan.FromDays(30); // O login dura 30 dias
+        options.SlidingExpiration = true;
+    });
 
 // Adiciona serviços ao contêiner.
 builder.Services.AddControllersWithViews();

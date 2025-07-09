@@ -1,0 +1,30 @@
+﻿@{
+    ViewData["Title"] = "Login";
+    Layout = "~/Views/Shared/_Layout.cshtml"; // Usa o layout padrão
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-4">
+        <h2 class="text-center">Acesso Restrito</h2>
+        <hr />
+        <form asp-action="Login" method="post">
+            <input type="hidden" name="returnUrl" value="@ViewData["ReturnUrl"]" />
+
+            @if (ViewData["ErrorMessage"] != null)
+            {
+                <div class="alert alert-danger" role="alert">
+                    @ViewData["ErrorMessage"]
+                </div>
+            }
+
+            <div class="form-group mb-3">
+                <label for="pin" class="form-label">PIN de Acesso</label>
+                <input type="password" id="pin" name="pin" class="form-control" autofocus />
+            </div>
+
+            <div class="d-grid">
+                <button type="submit" class="btn btn-primary">Entrar</button>
+            </div>
+        </form>
+    </div>
+</div>

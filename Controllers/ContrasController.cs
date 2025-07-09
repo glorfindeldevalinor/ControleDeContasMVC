@@ -1,14 +1,24 @@
-﻿using ControleDeContasMVC.Contexto;
+﻿using System.Formats.Asn1;
+using System.Globalization;
+using System.Text;
+using ControleDeContasMVC.Contexto;
 using ControleDeContasMVC.Models;
+using Microsoft.AspNetCore.Authorization;
+
 // ---------------------------------------------------------------------------------
 // ARQUIVO: Controllers/ContasController.cs
 // ---------------------------------------------------------------------------------
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using CsvHelper;
+using System.Globalization;
+using System.IO;
+using System.Text;
 
 
 namespace ControleDeContasMVC.Controllers;
 
+[Authorize]
 public class ContasController : Controller
 {
     private readonly AppDbContext _context;
@@ -161,5 +171,72 @@ public class ContasController : Controller
 
         // Redireciona para o novo mês criado
         return RedirectToAction(nameof(Index), new { mes = proximoMes.Month, ano = proximoMes.Year });
+    }
+
+    // Ação para baixar o arquivo de template CSV
+    public IActionResult DownloadTemplate()
+    {
+        // Criando uma lista de contas de exemplo
+        var exemplos = new List<Conta>
+    {
+        new Conta { Nome = "Aluguel", Valor = 2500.50M, Tipo = TipoConta.Despesa, DataVencimento = DateTime.Now.AddDays(5), Status = StatusConta.Pendente, Observacao = "Exemplo", DebitoAutomatico = false, ValorFixo = true },
+        new Conta { Nome = "Salário", Valor = 8500.00M, Tipo = TipoConta.Provento, DataVencimento = DateTime.Now, Status = StatusConta.Pago, Observacao = "Exemplo", DebitoAutomatico = false, ValorFixo = true }
+    };
+
+        var builder = new StringBuilder();
+        using (var writer = new StringWriter(builder))
+        using (var csv = new CsvWriter(writer, CultureInfo.InvariantCulture))
+        {
+            csv.WriteRecords(exemplos);
+        }
+
+        return File(Encoding.UTF8.GetBytes(builder.ToString()), "text/csv", "template_contas.csv");
+    }
+
+
+    // Ação para processar o upload do arquivo CSV
+    [HttpPost]
+    public async Task<IActionResult> UploadCsv(IFormFile csvFile)
+    {
+        if (csvFile == null || csvFile.Length == 0)
+        {
+            TempData["ErrorMessage"] = "Por favor, selecione um arquivo CSV.";
+            return RedirectToAction(nameof(Index));
+        }
+
+        var novasContas = new List<Conta>();
+
+        try
+        {
+            using (var reader = new StreamReader(csvFile.OpenReadStream()))
+            using (var csv = new CsvReader(reader, CultureInfo.InvariantCulture))
+            {
+                // O CsvHelper lê os registros e os mapeia para a classe Conta automaticamente
+                var records = csv.GetRecords<Conta>().ToList();
+
+                // A lógica da 'Ordem' foi removida daqui
+
+                foreach (var record in records)
+                {
+                    // Definimos propriedades padrão que não vêm do CSV
+                    record.Ativo = true;
+
+                    // Poderíamos adicionar outras validações aqui se necessário
+                    novasContas.Add(record);
+                }
+            }
+
+            await _context.Contas.AddRangeAsync(novasContas);
+            await _context.SaveChangesAsync();
+
+            TempData["SuccessMessage"] = $"{novasContas.Count} contas foram importadas com sucesso!";
+        }
+        catch (Exception ex)
+        {
+            // Em um app real, logaríamos o erro 'ex'
+            TempData["ErrorMessage"] = "Ocorreu um erro ao processar o arquivo. Verifique se o formato está correto.";
+        }
+
+        return RedirectToAction(nameof(Index));
     }
 }
