@@ -36,3 +36,13 @@ body {
     content: '\2212'; /* Caractere de subtração, mais elegante que o hífen */
     transform: rotate(180deg);
 }
+
+/* Estilo opcional para animar o botão de colapso do resumo */
+.btn-toggle-summary .bi {
+    transition: transform 0.3s ease-in-out;
+}
+
+/* Gira o ícone quando a seção está escondida */
+.btn-toggle-summary[aria-expanded="false"] .bi {
+    transform: rotate(-90deg);
+}

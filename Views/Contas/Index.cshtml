@@ -37,10 +37,35 @@
 
 </div>
 
-<div class="row mb-4 text-center">
-    <div class="col-md-4"><div class="card p-2"><h5 class="card-title">Proventos</h5><p class="card-text text-success">@ViewBag.TotalProventos.ToString("C")</p></div></div>
-    <div class="col-md-4"><div class="card p-2"><h5 class="card-title">Despesas</h5><p class="card-text text-danger">@ViewBag.TotalDespesas.ToString("C")</p></div></div>
-    <div class="col-md-4"><div class="card p-2"><h5 class="card-title">Balanço</h5><p class="card-text @(balanco >= 0 ? "text-success" : "text-danger")">@balanco.ToString("C")</p></div></div>
+<div class="summary-section">
+    <div class="text-end mb-2">
+        <button class="btn btn-light btn-sm btn-toggle-summary" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSummarySection" aria-expanded="false" aria-controls="collapseSummarySection" title="Exibir/Ocultar Resumo">
+            <i class="bi bi-currency-dollar"></i>
+        </button>
+    </div>
+
+    <div class="collapse" id="collapseSummarySection">
+        <div class="row text-center">
+            <div class="col-md-4 mb-3 mb-md-0">
+                <div class="card p-2">
+                    <h5 class="card-title">Proventos</h5>
+                    <p class="card-text text-success">@ViewBag.TotalProventos.ToString("C")</p>
+                </div>
+            </div>
+            <div class="col-md-4 mb-3 mb-md-0">
+                <div class="card p-2">
+                    <h5 class="card-title">Despesas</h5>
+                    <p class="card-text text-danger">@ViewBag.TotalDespesas.ToString("C")</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card p-2">
+                    <h5 class="card-title">Balanço</h5>
+                    <p class="card-text @(balanco >= 0 ? "text-success" : "text-danger")">@balanco.ToString("C")</p>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
 <div class="import-section my-4">
