@@ -1,8 +1,8 @@
-# Arquivos de configuração local com senhas
+# Arquivos de configuraï¿½ï¿½o local com senhas
 appsettings.Development.json
 appsettings.json
 
-# Dependências e arquivos de build
+# Dependï¿½ncias e arquivos de build
 [Bb]in/
 [Oo]bj/
 
@@ -13,3 +13,7 @@ appsettings.json
 .vs/
 *.suo
 *.user
+
+*.ps1
+*.bat
+*.txt

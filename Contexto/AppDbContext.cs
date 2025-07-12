@@ -1,16 +1,17 @@
 ﻿using ControleDeContasMVC.Models;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
 namespace ControleDeContasMVC.Contexto
 {
-    public class AppDbContext : DbContext
+    // Mude de 'DbContext' para 'IdentityDbContext<IdentityUser>'
+    public class AppDbContext : IdentityDbContext<IdentityUser>
     {
-        // Mapeia a classe 'Conta' para uma tabela 'Contas' no banco de dados
         public DbSet<Conta> Contas { get; set; }
 
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
         {
         }
-
     }
 }

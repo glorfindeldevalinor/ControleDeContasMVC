@@ -1,43 +1,45 @@
-// ---------------------------------------------------------------------------------
-// ARQUIVO: Program.cs (Configuração inicial do App MVC)
-// ---------------------------------------------------------------------------------
-// Adicione a linha 'builder.Services.AddDbContext<AppDbContext>();'
-// e a seção para criar o banco de dados na inicialização.
-
-using ControleDeContasMVC.Contexto;
-using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using ControleDeContasMVC.Contexto;
+using ControleDeContasMVC.Repositories;
+using ControleDeContasMVC.Services;
 
 var builder = WebApplication.CreateBuilder(args);
+
 AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
+
+// 1. Configuração do Banco de Dados
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(connectionString));
 
-builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
-    .AddCookie(options =>
+// 2. Configuração do ASP.NET Core Identity
+builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = false)
+    .AddEntityFrameworkStores<AppDbContext>();
+
+// 3. Configuração da Autenticação Externa (Google)
+builder.Services.AddAuthentication()
+    .AddGoogle(options =>
     {
-        options.LoginPath = "/Account/Login"; // Página para onde será redirecionado se não estiver logado
-        options.ExpireTimeSpan = TimeSpan.FromDays(30); // O login dura 30 dias
-        options.SlidingExpiration = true;
+        IConfigurationSection googleAuthNSection = builder.Configuration.GetSection("Authentication:Google");
+        options.ClientId = googleAuthNSection["ClientId"];
+        options.ClientSecret = googleAuthNSection["ClientSecret"];
     });
 
-// Adiciona serviços ao contêiner.
+// 4. Registro dos Repositórios e Serviços (Injeção de Dependência)
+builder.Services.AddScoped<IContaRepository, ContaRepository>();
+builder.Services.AddScoped<IContaService, ContaService>();
+
 builder.Services.AddControllersWithViews();
-
-// *** ADICIONE ESTA LINHA PARA REGISTRAR O DBCONTEXT ***
-builder.Services.AddDbContext<AppDbContext>();
-
 
 var app = builder.Build();
 
+// Bloco para aplicar migrações na inicialização
 using (var scope = app.Services.CreateScope())
 {
     var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-    // Este comando aplica as migrações pendentes, em vez de apenas criar o banco.
     dbContext.Database.Migrate();
 }
-
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
@@ -51,10 +53,16 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
+// Habilita a autenticação e autorização, nesta ordem
+app.UseAuthentication();
 app.UseAuthorization();
 
+// Rota padrão apontando para a página Home
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=Contas}/{action=Index}/{id?}");
+    pattern: "{controller=Home}/{action=Index}/{id?}");
+
+// Mapeia as páginas do Identity (Login, etc.)
+app.MapRazorPages();
 
 app.Run();
